@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using AutoMapper;
 using HotelListing.API.Data.Model;
 using HotelListing.API.Models.Country;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +11,12 @@ namespace HotelListing.API.Controllers
     public class CountriesController : ControllerBase
     {
         private readonly HotelListingDbContext _context;
+        private readonly IMapper _mapper;
 
-        public CountriesController(HotelListingDbContext context)
+        public CountriesController(HotelListingDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/Countries
@@ -73,13 +76,9 @@ namespace HotelListing.API.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         // overposting: preventing the user from submitting data that we don't want, or that could potentialy be harmful for the system
         [HttpPost]
-        public async Task<ActionResult<Country>> PostCountry(CreateCountryDto createCountry)
+        public async Task<ActionResult<Country>> PostCountry(CreateCountryDto createCountryDto)
         {
-            var country = new Country
-            {
-                Name = createCountry.Name,
-                Code = createCountry.Code
-            };
+            var country = _mapper.Map<Country>(createCountryDto);
 
             _context.Countries.Add(country);
             await _context.SaveChangesAsync();
