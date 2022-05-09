@@ -1,5 +1,6 @@
 ﻿#nullable disable
 using HotelListing.API.Data.Model;
+using HotelListing.API.Models.Country;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelListing.API.Controllers
@@ -70,9 +71,16 @@ namespace HotelListing.API.Controllers
 
         // POST: api/Countries
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // overposting: preventing the user from submitting data that we don't want, or that could potentialy be harmful for the system
         [HttpPost]
-        public async Task<ActionResult<Country>> PostCountry(Country country)
+        public async Task<ActionResult<Country>> PostCountry(CreateCountryDto createCountry)
         {
+            var country = new Country
+            {
+                Name = createCountry.Name,
+                Code = createCountry.Code
+            };
+
             _context.Countries.Add(country);
             await _context.SaveChangesAsync();
 
