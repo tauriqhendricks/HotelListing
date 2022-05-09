@@ -21,24 +21,29 @@ namespace HotelListing.API.Controllers
 
         // GET: api/Countries
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Country>>> GetCountries()
+        public async Task<ActionResult<IEnumerable<CountryListDto>>> GetCountries()
         {
             var countries = await _context.Countries.ToListAsync();
-            return Ok(countries);
+            var records = _mapper.Map<List<CountryListDto>>(countries);
+
+            return Ok(records);
         }
 
         // GET: api/Countries/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Country>> GetCountry(int id)
+        public async Task<ActionResult<CountryDetailsDto>> GetCountry(int id)
         {
-            var country = await _context.Countries.FindAsync(id);
+            var country = await _context.Countries.Include(x => x.Hotels)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
             if (country == null)
             {
                 return NotFound();
             }
 
-            return Ok(country);
+            var countryDetailsDto = _mapper.Map<CountryDetailsDto>(country);
+
+            return Ok(countryDetailsDto);
         }
 
         // PUT: api/Countries/5
@@ -76,14 +81,16 @@ namespace HotelListing.API.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         // overposting: preventing the user from submitting data that we don't want, or that could potentialy be harmful for the system
         [HttpPost]
-        public async Task<ActionResult<Country>> PostCountry(CreateCountryDto createCountryDto)
+        public async Task<ActionResult<CountryDetailsDto>> PostCountry(CreateCountryDto createCountryDto)
         {
             var country = _mapper.Map<Country>(createCountryDto);
 
             _context.Countries.Add(country);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCountry", new { id = country.Id }, country);
+            var countryDetailsDto = _mapper.Map<CountryDetailsDto>(country);
+
+            return CreatedAtAction("GetCountry", new { id = countryDetailsDto.Id }, countryDetailsDto);
         }
 
         // DELETE: api/Countries/5
